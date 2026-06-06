@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="96" fill="#1b5e20"/>
+<path d="M256 64 112 260h85l-70 94h93v94h72v-94h93l-70-94h85L256 64Z" fill="#fff"/>
+<text x="256" y="478" font-family="Arial, sans-serif" font-size="52" font-weight="800" text-anchor="middle" fill="#fff">WTE</text>
+</svg>

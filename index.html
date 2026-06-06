@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#1b5e20">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Westlake Invoice">
+  <title>Westlake Invoice</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header no-print">
+      <div class="brand-mark" id="brandMark"><img src="logo.png" alt="Westlake Tree Experts"></div>
+      <div>
+        <h1>Westlake Tree Experts</h1>
+        <p>(610) 291-1176 • bwestlake@business.com</p>
+      </div>
+    </header>
+
+    <nav class="tabs no-print">
+      <button class="tab active" data-view="dashboard">Dashboard</button>
+      <button class="tab" data-view="invoice">New Invoice</button>
+      <button class="tab" data-view="estimate">New Estimate</button>
+      <button class="tab" data-view="customers">Customers</button>
+      <button class="tab" data-view="history">History</button>
+      <button class="tab" data-view="reports">Reports</button>
+      <button class="tab" data-view="settings">Settings</button>
+    </nav>
+
+    <main>
+      <section id="dashboard" class="view active">
+        <div class="section-title">
+          <h2>Dashboard</h2>
+          <button class="primary" onclick="newInvoice()">+ New Invoice</button>
+        </div>
+        <div class="cards">
+          <div class="card"><span>Total Revenue</span><strong id="dashTotalRevenue">$0.00</strong></div>
+          <div class="card"><span>This Month</span><strong id="dashMonthRevenue">$0.00</strong></div>
+          <div class="card"><span>Outstanding</span><strong id="dashOutstanding">$0.00</strong></div>
+          <div class="card"><span>Paid</span><strong id="dashPaidCount">0</strong></div>
+          <div class="card"><span>Unpaid</span><strong id="dashUnpaidCount">0</strong></div>
+          <div class="card"><span>Overdue</span><strong id="dashOverdueCount">0</strong></div>
+          <div class="card"><span>Customers</span><strong id="dashCustomerCount">0</strong></div>
+        </div>
+        <div class="quick-actions">
+          <button onclick="newInvoice()">New Invoice</button>
+          <button onclick="newEstimate()">New Estimate</button>
+          <button onclick="showView('customers')">Customers</button>
+          <button onclick="showView('history')">Invoice History</button>
+        </div>
+      </section>
+
+      <section id="invoice" class="view">
+        <div class="section-title">
+          <h2 id="invoiceFormTitle">New Invoice</h2>
+          <button onclick="clearInvoiceForm()">Clear</button>
+        </div>
+        <form id="invoiceForm" class="form-card">
+          <input type="hidden" id="invoiceId">
+          <div class="grid">
+            <label>Customer
+              <select id="invoiceCustomerSelect"></select>
+            </label>
+            <label>Status
+              <select id="invoiceStatus">
+                <option>Draft</option><option>Sent</option><option>Paid</option><option>Unpaid</option><option>Overdue</option>
+              </select>
+            </label>
+            <label>Customer Name <input id="invoiceCustomerName" required></label>
+            <label>Phone <input id="invoiceCustomerPhone" inputmode="tel"></label>
+            <label>Email <input id="invoiceCustomerEmail" inputmode="email"></label>
+            <label>Address <textarea id="invoiceCustomerAddress"></textarea></label>
+            <label>Invoice # <input id="invoiceNumber"></label>
+            <label>Date <input id="invoiceDate" type="date"></label>
+            <label>Due Date <input id="invoiceDueDate" type="date"></label>
+          </div>
+
+          <h3>Line Items</h3>
+          <div id="invoiceLineItems" class="line-items"></div>
+          <button type="button" onclick="addInvoiceLineItem()">+ Add Line Item</button>
+
+          <div class="totals">
+            <label class="check"><input id="invoiceApplyTax" type="checkbox"> Apply Pennsylvania Sales Tax</label>
+            <label>Tax Rate % <input id="invoiceTaxRate" type="number" step="0.001" value="6"></label>
+            <div><span>Subtotal</span><strong id="invoiceSubtotal">$0.00</strong></div>
+            <div><span>Tax</span><strong id="invoiceTax">$0.00</strong></div>
+            <div class="grand"><span>Total</span><strong id="invoiceTotal">$0.00</strong></div>
+          </div>
+
+          <label>Work / Customer Notes <textarea id="invoiceNotes"></textarea></label>
+          <label>Internal Notes <textarea id="invoiceInternalNotes"></textarea></label>
+
+          <h3>Customer Signature</h3>
+          <canvas id="signaturePad" width="700" height="220"></canvas>
+          <div class="row-actions"><button type="button" onclick="clearSignature()">Clear Signature</button></div>
+
+          <h3>Job Photos</h3>
+          <input id="invoicePhotos" type="file" accept="image/*" multiple>
+          <div id="photoPreview" class="photo-preview"></div>
+
+          <div class="sticky-actions no-print">
+            <button type="button" class="primary" onclick="saveInvoice()">Save Invoice</button>
+            <button type="button" onclick="printCurrentInvoice()">Print / Save PDF</button>
+            <button type="button" onclick="shareCurrentInvoice()">Share</button>
+            <button type="button" onclick="deleteCurrentInvoice()">Delete</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="estimate" class="view">
+        <div class="section-title">
+          <h2 id="estimateFormTitle">New Estimate</h2>
+          <button onclick="clearEstimateForm()">Clear</button>
+        </div>
+        <form id="estimateForm" class="form-card">
+          <input type="hidden" id="estimateId">
+          <div class="grid">
+            <label>Customer <select id="estimateCustomerSelect"></select></label>
+            <label>Status
+              <select id="estimateStatus">
+                <option>Draft</option><option>Sent</option><option>Accepted</option><option>Declined</option><option>Expired</option>
+              </select>
+            </label>
+            <label>Customer Name <input id="estimateCustomerName" required></label>
+            <label>Phone <input id="estimateCustomerPhone" inputmode="tel"></label>
+            <label>Email <input id="estimateCustomerEmail" inputmode="email"></label>
+            <label>Address <textarea id="estimateCustomerAddress"></textarea></label>
+            <label>Estimate # <input id="estimateNumber"></label>
+            <label>Date <input id="estimateDate" type="date"></label>
+            <label>Expiration Date <input id="estimateExpireDate" type="date"></label>
+          </div>
+
+          <h3>Line Items</h3>
+          <div id="estimateLineItems" class="line-items"></div>
+          <button type="button" onclick="addEstimateLineItem()">+ Add Line Item</button>
+
+          <div class="totals">
+            <label class="check"><input id="estimateApplyTax" type="checkbox"> Apply Pennsylvania Sales Tax</label>
+            <label>Tax Rate % <input id="estimateTaxRate" type="number" step="0.001" value="6"></label>
+            <div><span>Subtotal</span><strong id="estimateSubtotal">$0.00</strong></div>
+            <div><span>Tax</span><strong id="estimateTax">$0.00</strong></div>
+            <div class="grand"><span>Total</span><strong id="estimateTotal">$0.00</strong></div>
+          </div>
+
+          <label>Notes <textarea id="estimateNotes"></textarea></label>
+
+          <div class="sticky-actions no-print">
+            <button type="button" class="primary" onclick="saveEstimate()">Save Estimate</button>
+            <button type="button" onclick="convertEstimateToInvoice()">Convert to Invoice</button>
+            <button type="button" onclick="printCurrentEstimate()">Print / Save PDF</button>
+            <button type="button" onclick="deleteCurrentEstimate()">Delete</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="customers" class="view">
+        <div class="section-title">
+          <h2>Customers</h2>
+          <button class="primary" onclick="clearCustomerForm()">+ New Customer</button>
+        </div>
+        <div class="form-card">
+          <input type="hidden" id="customerId">
+          <div class="grid">
+            <label>Name <input id="customerName"></label>
+            <label>Phone <input id="customerPhone"></label>
+            <label>Email <input id="customerEmail"></label>
+            <label>Address <textarea id="customerAddress"></textarea></label>
+            <label>Notes <textarea id="customerNotes"></textarea></label>
+          </div>
+          <div class="row-actions">
+            <button class="primary" onclick="saveCustomer()">Save Customer</button>
+            <button onclick="deleteCustomer()">Delete Customer</button>
+          </div>
+        </div>
+        <input class="search" id="customerSearch" placeholder="Search customers..." oninput="renderCustomers()">
+        <div id="customerList" class="list"></div>
+      </section>
+
+      <section id="history" class="view">
+        <div class="section-title"><h2>History</h2><button onclick="renderHistory()">Refresh</button></div>
+        <div class="filters">
+          <input id="historySearch" placeholder="Search invoices or estimates..." oninput="renderHistory()">
+          <select id="historyFilter" onchange="renderHistory()">
+            <option value="all">All</option><option value="invoice">Invoices</option><option value="estimate">Estimates</option>
+            <option value="Paid">Paid Invoices</option><option value="Unpaid">Unpaid Invoices</option><option value="Overdue">Overdue Invoices</option>
+          </select>
+        </div>
+        <div id="historyList" class="list"></div>
+      </section>
+
+      <section id="reports" class="view">
+        <div class="section-title"><h2>Reports</h2></div>
+        <div class="cards">
+          <div class="card"><span>Total Revenue</span><strong id="reportTotal">$0.00</strong></div>
+          <div class="card"><span>This Month</span><strong id="reportMonth">$0.00</strong></div>
+          <div class="card"><span>This Year</span><strong id="reportYear">$0.00</strong></div>
+          <div class="card"><span>Jobs</span><strong id="reportJobs">0</strong></div>
+          <div class="card"><span>Average Invoice</span><strong id="reportAverage">$0.00</strong></div>
+        </div>
+        <h3>Top Customers</h3><div id="topCustomers" class="list"></div>
+        <h3>Monthly Revenue</h3><div id="revenueBars" class="bars"></div>
+      </section>
+
+      <section id="settings" class="view">
+        <div class="section-title"><h2>Settings & Backup</h2></div>
+        <div class="form-card">
+          <h3>Business Info</h3>
+          <div class="grid">
+            <label>Business Name <input id="settingsBusinessName"></label>
+            <label>Phone <input id="settingsPhone"></label>
+            <label>Email <input id="settingsEmail"></label>
+            <label>Address <textarea id="settingsAddress"></textarea></label>
+            <label>Default Tax Rate % <input id="settingsTaxRate" type="number" step="0.001"></label>
+            <label>Replace Logo <input id="settingsLogo" type="file" accept="image/*"></label>
+          </div>
+          <div class="row-actions">
+            <button class="primary" onclick="saveSettings()">Save Settings</button>
+            <button onclick="resetDemoData()">Clear All Data</button>
+          </div>
+          <h3>Backup</h3>
+          <div class="row-actions">
+            <button onclick="exportBackup()">Export Backup</button>
+            <label class="button-like">Import Backup <input id="importBackupFile" type="file" accept="application/json" onchange="importBackup(event)"></label>
+          </div>
+          <p class="hint">Data is stored locally on this device/browser. Export backups regularly.</p>
+        </div>
+      </section>
+    </main>
+
+    <section id="printArea"></section>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
