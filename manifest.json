@@ -9,7 +9,7 @@
   "description": "Invoice, estimate, customer, and payment tracking for Westlake Tree Experts.",
 "icons": [
   {
-    "src": "icon-512.png",
+    "src": "icon.svg.jpg",
     "sizes": "512x512",
     "type": "image/png",
     "purpose": "any maskable"
